@@ -79,19 +79,34 @@ class EntryService {
     // API endpoints
     this.api.post("/entries", inflight (req): cloud.ApiResponse => {
       if let body = req.body {
-        let var contents = Json.parse(body).get("contents").asStr();
-        let var name = Json.parse(body).get("name").asStr();
-        
-        let id = this.entryStorage.add(name, contents);
-        return {
-          status:201,
-          body: id
-        };
+
+        try {
+
+          log("body: {body}");
+          let var name = Json.parse(body).get("name").asStr();
+          let var contents = Json.parse(body).get("contents").asStr();
+
+          let id = this.entryStorage.add(name, contents);
+          return {
+            status:201,
+            body: id
+          };
+
+
+        } catch e {
+          log(e);
+          return {
+            status: 500
+          };
+        }
+
       } else {
         return {
           status: 400,
         };
       }
+
+
     });
 
     this.api.put("/entries/:id", inflight (req): cloud.ApiResponse => {
@@ -149,7 +164,7 @@ class EntryService {
 }
 
 let storage = new EntryStorage();
-let taskApi = new EntryService(storage);
+let entryApi = new EntryService(storage);
 
 test "Add and Retrieve Entry" {
 
@@ -158,23 +173,36 @@ test "Add and Retrieve Entry" {
         "Content-Type": "application/json"
     };
 
-    let bodyJson = Json([
-        {
-            "name": "en",
-            "content": "this is content"
-        }
-    ]);
+    let bodyJson = Json {
+      name: "en",
+      contents: "this is content"
+    };
 
-
-
-//    let response = http.post(url, {
-//            headers: headers,
-//            body: 
-//                Json.stringify(bodyJson)
-//            });
+    log(Json.stringify(bodyJson));
+    // Get our base URL
+    let url = entryApi.api.url;
     
+    // Now use it
+    let post_response = http.post("{url}/entries", {
+        headers: headers,
+        body: Json.stringify(bodyJson)
+    });
   
-//  expect.equal(response.status, 200);
-//  expect.equal(response.body, Json.stringify(Json[{"id":"0","description":"task 1","status":"PENDING"}]));
-//  expect.equal(response.headers.get("access-control-allow-origin"), "*");
+
+    expect.equal(post_response.status, 201);
+
+    let id = post_response.body;
+
+  // Now use it
+  let get_response = http.get("{url}/entries/{id}", {
+    headers: headers
+  });
+
+  expect.equal(get_response.status, 200);
+  
+  expect.equal(Json.parse(get_response.body).get("name").asStr(), "en");
+  expect.equal(Json.parse(get_response.body).get("contents").asStr(), "this is content");
+
+
+
 }
