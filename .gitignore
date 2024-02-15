@@ -1,0 +1,29 @@
+# Ignore build artifacts
+build/
+
+# Ignore dependencies
+node_modules/
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore compiled WingLang files
+*.wingc
+*.wingo
+
+# Ignore logs
+*.log
+
+# Ignore environment variables
+.env
+.env.local
+.env.*.local
+
+# Ignore package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore editor backup files
+*~
