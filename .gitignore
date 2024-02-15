@@ -4,6 +4,10 @@ build/
 # Ignore dependencies
 node_modules/
 
+
+# Ignore wing output
+target/
+
 # Ignore IDE files
 .vscode/
 .idea/
