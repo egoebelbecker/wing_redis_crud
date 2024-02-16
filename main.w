@@ -1,6 +1,5 @@
 bring cloud;
 bring ex;
-bring util;
 bring http;
 bring expect;
 
@@ -16,8 +15,6 @@ interface IEntryStorage extends std.IResource {
   inflight remove(id: str): void;
   inflight get(id: str): Entry?;
 }
-
-let foo = "foo";
 
 class EntryStorage impl IEntryStorage {
   db: ex.Redis;
@@ -45,13 +42,13 @@ class EntryStorage impl IEntryStorage {
   }
 
   pub inflight update(id: str, name: str, contents: str): str {
-    let taskJson = {
+    let entryJson = {
       id: id,
       name: name,
       contents: contents
     };
-    this._add(id, taskJson);
-    log("adding entry {id} with data: {taskJson}");
+    this._add(id, entryJson);
+    log("adding entry {id} with data: {entryJson}");
     return id;
   }
 
@@ -81,11 +78,8 @@ class EntryService {
       if let body = req.body {
 
         try {
-
-          log("body: {body}");
           let var name = Json.parse(body).get("name").asStr();
           let var contents = Json.parse(body).get("contents").asStr();
-
           let id = this.entryStorage.add(name, contents);
           return {
             status:201,
@@ -94,7 +88,6 @@ class EntryService {
 
 
         } catch e {
-          log(e);
           return {
             status: 500
           };
@@ -105,8 +98,6 @@ class EntryService {
           status: 400,
         };
       }
-
-
     });
 
     this.api.put("/entries/:id", inflight (req): cloud.ApiResponse => {
@@ -168,7 +159,6 @@ let entryApi = new EntryService(storage);
 
 test "Add and Retrieve Entry" {
 
-
     let headers = {
         "Content-Type": "application/json"
     };
@@ -198,11 +188,8 @@ test "Add and Retrieve Entry" {
     headers: headers
   });
 
-  expect.equal(get_response.status, 200);
-  
+  expect.equal(get_response.status, 200); 
   expect.equal(Json.parse(get_response.body).get("name").asStr(), "en");
   expect.equal(Json.parse(get_response.body).get("contents").asStr(), "this is content");
-
-
 
 }
